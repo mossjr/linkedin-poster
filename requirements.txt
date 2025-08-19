@@ -1,0 +1,5 @@
+google-generativeai
+linkedin-api
+requests
+Flask
+Pillow
