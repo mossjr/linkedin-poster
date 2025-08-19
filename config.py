@@ -1,6 +1,0 @@
-GEMINI_API_KEY = "AIzaSyASimo7BQ0IPAhA2L0SgUr8MV-q74nButk"
-LINKEDIN_CLIENT_ID = "86subp662fif9l"
-LINKEDIN_CLIENT_SECRET = "WPL_AP1.MZt3ml5tSRJeTrIm.offHLw=="
-LINKEDIN_REDIRECT_URI = "http://localhost:3000/auth/linkedin/callback"
-GEMINI_TEXT_MODEL = "models/gemini-2.5-flash"
-GEMINI_IMAGE_MODEL = "models/gemini-2.0-flash-preview-image-generation"
