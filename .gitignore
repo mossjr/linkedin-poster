@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.log
 .env
+config.py
 static/
 .flaskenv
 instance/
