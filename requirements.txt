@@ -3,3 +3,4 @@ linkedin-api
 requests
 Flask
 Pillow
+setuptools

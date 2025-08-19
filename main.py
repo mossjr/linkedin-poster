@@ -37,15 +37,14 @@ def generate_linkedin_post(prompt):
     return response.text
 
 def generate_ai_image(prompt):
-    # Using Gemini's built-in multimodal capabilities for image generation.
-    # The model must support 'TEXT' and 'IMAGE' response modalities.
+    """Generates an AI image based on a prompt and saves it locally."""
     try:
         model = genai.GenerativeModel(GEMINI_IMAGE_MODEL)
-        # Pass response_modalities as part of a dictionary for generation_config
+        
+        # Corrected the generation_config by removing the unsupported response_mime_type
         response = model.generate_content(
             prompt,
             generation_config={
-                "response_mime_type": "image/jpeg", # Specify the desired MIME type for the image
                 "response_modalities": ["TEXT", "IMAGE"]
             }
         )
@@ -53,9 +52,14 @@ def generate_ai_image(prompt):
         # Iterate through parts to find image data
         if response and response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
             for part in response.candidates[0].content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    image_data_b64 = part.inline_data.data # This is already base64 encoded
+                if hasattr(part, 'inline_data') and part.inline_data and hasattr(part.inline_data, 'data'):
+                    image_data_b64 = part.inline_data.data # This is base64 encoded
+                    print(f"DEBUG: Length of base64 image data: {len(image_data_b64)}")
+                    # print(f"DEBUG: Raw base64 image data (first 100 chars): {image_data_b64[:100]}...")
                     image_bytes = base64.b64decode(image_data_b64)
+                    
+                    # Use Pillow to open and save the image to ensure it's a valid PNG
+                    image = Image.open(io.BytesIO(image_bytes))
                     
                     # Create static folder if it doesn't exist
                     static_folder = os.path.join(app.root_path, 'static')
@@ -64,20 +68,20 @@ def generate_ai_image(prompt):
                     # Save the image locally with a unique filename
                     filename = f"{uuid.uuid4()}.png"
                     filepath = os.path.join(static_folder, filename)
-                    with open(filepath, 'wb') as f:
-                        f.write(image_bytes)
+                    image.save(filepath)
                         
-                    local_image_url = url_for('static', filename=filename)
+                    local_image_url = url_for('static', filename=filename, _external=True)
                     print(f"DEBUG: Saved image to {filepath}, accessible at {local_image_url}")
                     return local_image_url # Return URL for local serving
+
             print(f"DEBUG: Gemini API returned no inline image data for prompt: {prompt}")
-            return "https://via.placeholder.com/150"
+            return "https://via.placeholder.com/150" # Fallback image
         else:
             print(f"DEBUG: Gemini API returned no candidates or content for prompt: {prompt}")
-            return "https://via.placeholder.com/150"
+            return "https://via.placeholder.com/150" # Fallback image
     except Exception as e:
         print(f"DEBUG: Error generating image with {GEMINI_IMAGE_MODEL}: {e}")
-        return "https://via.placeholder.com/150"
+        return "https://via.placeholder.com/150" # Fallback image
 
 @app.route('/login/linkedin')
 def linkedin_login():
